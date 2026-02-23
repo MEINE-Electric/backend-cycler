@@ -18,7 +18,7 @@ app = FastAPI(title="Local Dashboard API")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -114,6 +114,24 @@ def start_cycler(SETUP_ID: str):
     ).start()
 
     return {"status": "started"}
+
+@app.post("/control/{CONTROL_ID}/{SETUP_ID}")
+def send_control_command(CONTROL_ID: str, SETUP_ID: str):
+    if SETUP_ID not in MQTT:
+        raise HTTPException(404, "Invalid SETUP_ID")
+
+    if CONTROL_ID == "STOP":
+        SEQUENCER[SETUP_ID]._handle_stop()
+    elif CONTROL_ID == "PAUSE":
+        SEQUENCER[SETUP_ID]._handle_pause()
+    elif CONTROL_ID == "RESUME":
+        SEQUENCER[SETUP_ID]._handle_resume()
+    elif CONTROL_ID == "SKIP":
+        SEQUENCER[SETUP_ID]._handle_skip()
+    else:
+        raise HTTPException(400, "Invalid CONTROL_ID")
+
+    return {"status": "sent"}
 
 @app.get("/rows/{SETUP_ID}")
 def get_rows(SETUP_ID: str):

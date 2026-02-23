@@ -78,7 +78,7 @@ class Sequencer:
 
     def _handle_rest(self, cmd: dict):
         self.mqtt.publish("commands", cmd)
-        print("REST STATE")
+        print("[SEQ] REST STATE")
 
     def _handle_goto(self, cmd: dict, goto_repeats: dict) -> bool:
         """
@@ -107,7 +107,29 @@ class Sequencer:
         self.mqtt.ack.set()
         print("[SEQ] GOTO finished")
         return False
+    
+    # ------------------------
+    # Control Handlers
+    # ------------------------
+    def _handle_stop(self):
+        self.mqtt.publish("commands", {"command": "STOP"})
+        self.running = False
+        print("[SEQ] STOP command sent")
 
+    def _handle_pause(self):
+        self.mqtt.publish("commands", {"command": "PAUSE"})
+        self.running = False
+        print("[SEQ] PAUSE command sent")
+
+    def _handle_resume(self):
+        self.mqtt.publish("commands", {"command": "RESUME"})
+        self.running = True
+        print("[SEQ] RESUME command sent")
+
+    def _handle_skip(self):
+        self.mqtt.publish("commands", {"command": "SKIP"})
+        print("[SEQ] SKIP command sent")
+    
     # ------------------------
     # Control hooks (optional)
     # ------------------------
