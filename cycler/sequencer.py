@@ -29,12 +29,12 @@ class Sequencer:
             self.mqtt.status["step"] = self.current_step
             self.mqtt.status["goto"] = goto_repeats
 
-            print("Step: ",self.current_step)
-
             # Wait for hardware readiness
             self.mqtt.ack.wait()
 
             cmd = self.commands.get(self.current_step)
+            self.commands.print_all(self.current_step)
+            
             name = cmd["command"]
 
             print(f"[SEQ] {self.current_step:02d} → {name}")
@@ -99,7 +99,7 @@ class Sequencer:
                 f"[SEQ] GOTO → {target} "
                 f"(repeats left: {goto_repeats[idx]})"
             )
-            self.current_step = target
+            self.current_step = target*2
             return True
 
         # Done repeating

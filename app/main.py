@@ -47,7 +47,7 @@ clients_lock = asyncio.Lock()
 
 # -------------------- Startup Init --------------------
 
-N = 4 # setups
+N = 5 # setups
 C = 2  # channels
 
 for i in range(N):
@@ -81,21 +81,23 @@ def set_command(SETUP_ID: str, DATA: Dict[str, Any]):
 
     commands = DATA["commands"]
     rows = DATA["rows"]
+    experiment = DATA.get("experiment", "default")
 
-    
     if commands is None or rows is None:
         raise HTTPException(400, "Invalid payload structure")
 
     if SETUP_ID not in SEQUENCER:
         raise HTTPException(404, "Invalid SETUP_ID")
 
-    seq = COMMANDS.get(SETUP_ID)
+    seq = COMMANDS.get(SETUP_ID) # Setup commands for experiments
     if not seq:
         seq = Sequence()
         COMMANDS[SETUP_ID] = seq
     seq.set(commands)
 
-    ROWS[SETUP_ID] = rows
+    ROWS[SETUP_ID] = rows # Setup commands for frontend query
+
+    MQTT[SETUP_ID].measurement = experiment
     
     return {"status": "ok"}
 
